@@ -1,0 +1,5 @@
+The Colossus machines were early computing devices used by British codebreakers to read encrypted German messages during World War II. Colossus was an early binary electronic digital computer.
+
+Colossus was designed by engineer Tommy Flowers at the Post Office Research Station, Dollis Hill with input from mathematician Max Newman and group at Bletchley park. The prototype, Colossus Mark I, was shown working in December 1943 and was operational at Bletchley Park by February 1944. An improved Colossus Mark II was first installed in June 1944, and ten Colossi had been constructed by the end of the war.
+
+The Colossus computers were used to help decipher teleprinter messages which had been encrypted using the Lorenz SZ40/42 machine. Colossus compared two data streams, counting each match based on a programmable boolean function. The encrypted message was read at high speed from a paper tape. The other stream was generated internally, and was an electronic simulation of the Lorenz machine at various trial settings. If the match count for a setting was above a certain threshold, it would be output on an electric typewriter

@@ -1,0 +1,27 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="Host" Type="System.String" Scope="User">
+      <Value Profile="(Default)">localhost</Value>
+    </Setting>
+    <Setting Name="Username" Type="System.String" Scope="User">
+      <Value Profile="(Default)">myuserID</Value>
+    </Setting>
+    <Setting Name="Password" Type="System.String" Scope="User">
+      <Value Profile="(Default)">myPassword</Value>
+    </Setting>
+    <Setting Name="LocalDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)">C:\Test\FTP</Value>
+    </Setting>
+    <Setting Name="RemoteDir" Type="System.String" Scope="User">
+      <Value Profile="(Default)">/ftpTest/</Value>
+    </Setting>
+    <Setting Name="ImageFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ColossusImage</Value>
+    </Setting>
+    <Setting Name="TextFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ColossusText</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

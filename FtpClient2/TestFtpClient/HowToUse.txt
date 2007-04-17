@@ -1,0 +1,23 @@
+Using the unit test classes
+===========================
+
+The unit test classes are provided to help testing of the FtpClient class code.
+
+You can test either the VB or the C# library by adding a reference to it to the TestFtpClient project. By default the solution should have the VB project referenced. I have tried to make the tests 'self-contained' but some configuration and setup is required.
+
+BEFORE TESTING
+--------------
+
+Please alter the values in the Project Settings for the TestFtpClient project. You will need to set:
+	- Host			hostname for your ftp server, e.g. ftp.mydomain.com
+	- Username		username for ftp
+	- Password		password for ftp
+	- LocalDir		a local directory to store test files
+	- RemoteDir		a remote directory on the ftp server to store test files
+	
+The user account should have read/write access to the RemoteDir on the ftp server or upload and download tests will fail. If you need to test an ftp server that has only a readonly account, disable the tests and create your own ones.
+
+The test system will create one .JPG and one .TXT file in the local directory and will upload and download these to the FTP server for testing purposes. It should leave the RemoteDir clean after the tests complete.
+
+[The source data for these files is stored in the resources for the test project. I used a photo and a sample of text from the Wikipedia entry on Colossus http://en.wikipedia.org/wiki/Colossus_computer.]
+                                                                                    
