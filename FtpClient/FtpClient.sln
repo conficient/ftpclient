@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "FtpClientVB", "FtpClientVB\FtpClientVB.vbproj", "{C4B489B4-6146-4750-9B4F-6B001F84EF99}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FtpClientCS", "FtpClientCS\FtpClientCS.csproj", "{97AFE8E3-1A7E-4637-A5E5-6E5036E0DD3D}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "TestFtpClient", "TestFtpClient\TestFtpClient.vbproj", "{B8BCD1E1-3359-4899-8251-DB3BC1F25329}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7ADE0CFF-1306-434B-B0DD-B4C5011CAD41}"
+	ProjectSection(SolutionItems) = preProject
+		FtpClient.vsmdi = FtpClient.vsmdi
+		localtestrun.testrunconfig = localtestrun.testrunconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 4
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = https://tfs02.codeplex.com/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = FtpClientCS\\FtpClientCS.csproj
+		SccProjectName1 = FtpClientCS
+		SccLocalPath1 = FtpClientCS
+		SccProjectUniqueName2 = FtpClientVB\\FtpClientVB.vbproj
+		SccProjectName2 = FtpClientVB
+		SccLocalPath2 = FtpClientVB
+		SccProjectUniqueName3 = TestFtpClient\\TestFtpClient.vbproj
+		SccProjectName3 = TestFtpClient
+		SccLocalPath3 = TestFtpClient
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4B489B4-6146-4750-9B4F-6B001F84EF99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4B489B4-6146-4750-9B4F-6B001F84EF99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4B489B4-6146-4750-9B4F-6B001F84EF99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4B489B4-6146-4750-9B4F-6B001F84EF99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97AFE8E3-1A7E-4637-A5E5-6E5036E0DD3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97AFE8E3-1A7E-4637-A5E5-6E5036E0DD3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97AFE8E3-1A7E-4637-A5E5-6E5036E0DD3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97AFE8E3-1A7E-4637-A5E5-6E5036E0DD3D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8BCD1E1-3359-4899-8251-DB3BC1F25329}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8BCD1E1-3359-4899-8251-DB3BC1F25329}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8BCD1E1-3359-4899-8251-DB3BC1F25329}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8BCD1E1-3359-4899-8251-DB3BC1F25329}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
