@@ -11,16 +11,17 @@ Namespace Utilities.FTP
     ''' A wrapper class for .NET 2.0 FTP
     ''' </summary>
     ''' <remarks>
-    ''' Version 1.0
+    ''' Version 1.2
     ''' 
     ''' Currently this class does not hold open an FTP connection but 
     ''' instead is stateless: for each FTP request it connects, performs the request and disconnects.
     ''' 
     ''' v1.0 original version
+    ''' 
     ''' v1.1 added support for EnableSSL, UsePassive and Proxy connections
-    ''' Also added support for downloading correct date/time from FTP server for
-    ''' each file
-    ''' Added FtpDirectoryExists function to check for existence of remote directory
+    '''    Also added support for downloading correct date/time from FTP server for each file
+    '''    Added FtpDirectoryExists function to check for existence of remote directory
+    ''' 
     ''' </remarks>
     Public Class FTPclient
 

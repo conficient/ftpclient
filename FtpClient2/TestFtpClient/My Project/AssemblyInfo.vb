@@ -9,7 +9,7 @@ Imports System.Runtime.InteropServices
 ' Review the values of the assembly attributes
 
 <Assembly: AssemblyTitle("TestFtpClient")> 
-<Assembly: AssemblyDescription("")> 
+<Assembly: AssemblyDescription("Unit tests for Ftp Client")> 
 <Assembly: AssemblyCompany("Brackenbury Consulting Limited")> 
 <Assembly: AssemblyProduct("TestFtpClient")> 
 <Assembly: AssemblyCopyright("Copyright © Brackenbury Consulting Limited 2007")> 
@@ -33,5 +33,5 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("1.0.0.0")> 
-<Assembly: AssemblyFileVersion("1.0.0.0")> 
+<Assembly: AssemblyVersion("1.2.0.0")> 
+<Assembly: AssemblyFileVersion("1.2.0.0")> 

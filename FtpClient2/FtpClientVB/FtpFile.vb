@@ -15,6 +15,8 @@ Namespace Utilities.FTP
     ''' directory list from FTP. It supports most formats of
     ''' 
     ''' v1.1 fixed bug in Fullname/path
+    ''' 
+    ''' v1.2 fixed bug to handle blank size field
     ''' </remarks>
     Public Class FTPfileInfo
         'Stores extended info about FTP file
@@ -116,7 +118,10 @@ Namespace Utilities.FTP
             Else
                 _filename = m.Groups("name").Value
                 _path = path
-                _size = CLng(m.Groups("size").Value)
+
+                'v1.2 - fix to handle null size fields (copied from C# version)
+                Int64.TryParse(m.Groups("size").Value, _size)
+
                 _permission = m.Groups("permission").Value
                 Dim _dir As String = m.Groups("dir").Value
                 If (_dir <> "" And _dir <> "-") Then
