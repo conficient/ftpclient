@@ -14,7 +14,7 @@ namespace FTP
 
 	#region "FTP client class"
 	/// <summary>
-	/// A wrapper class for .NET 2.0 FTP
+	/// A wrapper class for .NET 2.0 FTP protocol
 	/// </summary>
 	/// <remarks>
 	/// This class does not hold open an FTP connection but
@@ -23,10 +23,11 @@ namespace FTP
 	/// 
 	/// v1.0 - original version
 	/// v1.1 - added support for EnableSSL, UsePassive and Proxy connections
-    /// Also added support for downloading correct date/time from FTP server for
-    /// each file
-	/// Added FtpDirectoryExists function as FtpFileExists does not work as directory
-	/// exists check.
+    /// v1.2 - added support for downloading correct date/time from FTP server for
+    ///        each file
+	///        Added FtpDirectoryExists function as FtpFileExists does not work as directory
+	///        exists check.
+    /// v1.3 - upgraded to VS2008 projects
 	/// </remarks>
 	public class FTPclient
 	{
