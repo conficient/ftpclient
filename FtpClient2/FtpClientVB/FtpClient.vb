@@ -586,9 +586,6 @@ Namespace Utilities.FTP
         ''' <returns></returns>
         ''' <remarks></remarks>
         Private Function GetEscapedPath(ByVal path As String) As String
-            'Dim tmp2 As String = System.Uri.EscapeDataString(path)
-            'Dim tmp As String = System.Uri.EscapeUriString(path)
-            'Return tmp.Replace("#", "%23")
             'split into directory parts
             Dim parts() As String = path.Split("/")
             Dim result As String = ""
