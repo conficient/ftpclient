@@ -30,35 +30,37 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         'setup binary jpg image to use for testing
         imageFile = New IO.FileInfo(localdir.FullName & "\" & My.Settings.ImageFile & ".jpg")
         'clear any existing file
-        If imageFile.Exists Then imageFile.Delete()
-        'write internal resource into it
-        My.Resources.ColossusImage.Save(imageFile.FullName)
-        'set remote target version
+        If Not imageFile.Exists Then
+            'write internal resource into it
+            My.Resources.ColossusImage.Save(imageFile.FullName)
+            'set remote target version
+        End If
         imageFileTarget = remoteDir & imageFile.Name
 
         'setup text file to use for testing
         textFile = New IO.FileInfo(localdir.FullName & "\" & My.Settings.TextFile & ".txt")
-        'clear any existing file
-        If textFile.Exists Then textFile.Delete()
-        'write internal resource into it
-        My.Computer.FileSystem.WriteAllText(textFile.FullName, My.Resources.ColossusText, False)
-        'set remote target filename
+        'ensure file exists
+        If Not textFile.Exists Then
+            'write internal resource into it
+            My.Computer.FileSystem.WriteAllText(textFile.FullName, My.Resources.ColossusText, False)
+            'set remote target filename
+        End If
         textFileTarget = remoteDir & textFile.Name
-
 
         'setup special chars file to use for testing
         specialCharsFile = New IO.FileInfo(localdir.FullName & "\" & My.Settings.SpecialCharsFile & ".txt")
         'clear any existing file
-        If specialCharsFile.Exists Then textFile.Delete()
-        'write internal resource into it
-        My.Computer.FileSystem.WriteAllText(specialCharsFile.FullName, My.Resources.ColossusText, False)
-        'set remote target filename
+        If Not specialCharsFile.Exists Then
+            'write internal resource into it
+            My.Computer.FileSystem.WriteAllText(specialCharsFile.FullName, My.Resources.ColossusText, False)
+            'set remote target filename
+        End If
         specialCharsFileTarget = remoteDir & specialCharsFile.Name
 
 
         'ensure remote test directory exists
         Dim ftp As New Utilities.FTP.FTPclient(My.Settings.Host, My.Settings.Username, My.Settings.Password)
-        If ftp.ftpDirectoryExists(remoteDir) = False Then
+        If ftp.FtpDirectoryExists(remoteDir) = False Then
             'create directory
             ftp.FtpCreateDirectory(remoteDir)
         End If
@@ -87,8 +89,12 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     End Sub
 
     ' Use TestInitialize to run code before running each test
-    ' <TestInitialize()> Public Sub MyTestInitialize()
-    ' End Sub
+    <TestInitialize()> Public Sub MyTestInitialize()
+        'check source files exist
+        If Not imageFile.Exists Then Assert.Fail("Image file missing")
+        If Not textFile.Exists Then Assert.Fail("Text file missing")
+        If Not specialCharsFile.Exists Then Assert.Fail("Special chars file missing")
+    End Sub
     '
     ' Use TestCleanup to run code after each test has run
     ' <TestCleanup()> Public Sub MyTestCleanup()
