@@ -23,5 +23,8 @@
     <Setting Name="TextFile" Type="System.String" Scope="User">
       <Value Profile="(Default)">ColossusText</Value>
     </Setting>
+    <Setting Name="SpecialCharsFile" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Test#1café</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

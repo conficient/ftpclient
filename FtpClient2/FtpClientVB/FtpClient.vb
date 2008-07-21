@@ -20,9 +20,9 @@ Namespace Utilities.FTP
     ''' 
     ''' v1.2 - Currently this class does not hold open an FTP connection but 
     '''        instead is stateless: for each FTP request it connects, performs the request and disconnects.
+    '''        Also added CreateURI function to centralise this and add Escape sequence to payload.
+    '''        Amended Upload to throw exception if encountered
     '''
-    ''' v1.3 - Upgraded to VS2008 project.
-    ''' 
     ''' </remarks> 
     Public Class FTPclient
 
@@ -64,10 +64,13 @@ Namespace Utilities.FTP
         ''' </summary>
         ''' <param name="directory">Directory to list, e.g. /pub</param>
         ''' <returns>A list of filenames and directories as a List(of String)</returns>
-        ''' <remarks>For a detailed directory listing, use ListDirectoryDetail</remarks>
+        ''' <remarks>
+        ''' For a detailed directory listing, use ListDirectoryDetail
+        ''' </remarks>
         Public Function ListDirectory(Optional ByVal directory As String = "") As List(Of String)
             'return a simple list of filenames in directory
-            Dim ftp As Net.FtpWebRequest = GetRequest(GetDirectory(directory))
+            Dim URI As String = GetDirectory(directory)
+            Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Set request to do simple list
             ftp.Method = Net.WebRequestMethods.Ftp.ListDirectory
 
@@ -87,8 +90,9 @@ Namespace Utilities.FTP
         ''' <param name="doDateTimeStamp">Boolean: set to True to also download the file date/time stamps</param>
         ''' <returns>An FTPDirectory object</returns>
         Public Function ListDirectoryDetail(Optional ByVal directory As String = "", _
-                Optional ByVal doDateTimeStamp As Boolean = False) As FTPdirectory
-            Dim ftp As Net.FtpWebRequest = GetRequest(GetDirectory(directory))
+                                            Optional ByVal doDateTimeStamp As Boolean = False) As FTPdirectory
+            Dim URI As String = GetDirectory(directory)
+            Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Set request to do simple list
             ftp.Method = Net.WebRequestMethods.Ftp.ListDirectoryDetails
 
@@ -130,95 +134,32 @@ Namespace Utilities.FTP
             Return Upload(fi, targetFilename)
         End Function
 
-        '''' <summary>
-        '''' Upload a local file to the FTP server (local file as IO.FileInfo)
-        '''' </summary>
-        '''' <param name="fi">Source file</param>
-        '''' <param name="targetFilename">Target filename (optional)</param>
-        '''' <returns></returns>
-        'Public Function Upload(ByVal fi As FileInfo, Optional ByVal targetFilename As String = "") As Boolean
-        '    'copy the file specified to target file: target file can be full path or just filename (uses current dir)
-
-        '    '1. check target
-        '    Dim target As String
-        '    If targetFilename.Trim = "" Then
-        '        'Blank target: use source filename & current dir
-        '        target = Me.CurrentDirectory & fi.Name
-        '    ElseIf targetFilename.Contains("/") Then
-        '        'If contains / treat as a full path
-        '        target = AdjustDir(targetFilename)
-        '    Else
-        '        'otherwise treat as filename only, use current directory
-        '        target = CurrentDirectory & targetFilename
-        '    End If
-
-        '    Dim URI As String = Hostname & target
-        '    'perform copy
-        '    Dim ftp As Net.FtpWebRequest = GetRequest(URI)
-
-        '    'Set request to upload a file in binary
-        '    ftp.Method = Net.WebRequestMethods.Ftp.UploadFile
-        '    ftp.UseBinary = True
-
-        '    'Notify FTP of the expected size
-        '    ftp.ContentLength = fi.Length
-
-        '    'create byte array to store: ensure at least 1 byte!
-        '    Const BufferSize As Integer = 2048
-        '    Dim content(BufferSize - 1) As Byte, dataRead As Integer
-
-        '    'open file for reading 
-        '    Using fs As FileStream = fi.OpenRead()
-        '        Try
-        '            'open request to send
-        '            Using rs As Stream = ftp.GetRequestStream
-        '                Do
-        '                    dataRead = fs.Read(content, 0, BufferSize)
-        '                    rs.Write(content, 0, dataRead)
-        '                Loop Until dataRead < BufferSize
-        '                rs.Close()
-        '            End Using
-        '        Catch ex As Exception
-
-        '        Finally
-        '            'ensure file closed
-        '            fs.Close()
-        '        End Try
-
-        '    End Using
-
-        '    ftp = Nothing
-        '    Return True
-
-        'End Function
-
         ''' <summary>
-        ''' Upload a local file to the FTP server
+        ''' Upload a local file to the FTP server (local file as FileInfo)
         ''' </summary>
         ''' <param name="fi">Source file</param>
         ''' <param name="targetFilename">Target filename (optional)</param>
-        ''' <returns></returns>
+        ''' <returns>
+        ''' 1.2 [HR] amended code to not duplicate the file conversion (now in other upload)
+        ''' </returns>
         Public Function Upload(ByVal fi As FileInfo, ByVal targetFilename As String) As Boolean
             'copy the file specified to target file: target file can be full path or just filename (uses current dir)
             '1. check target
-            Dim target As String
-            If targetFilename.Trim() = "" Then
+            Dim target As String = targetFilename
+            If String.IsNullOrEmpty(targetFilename) Then
                 'Blank target: use source filename & current dir
                 target = Me.CurrentDirectory + fi.Name
-            ElseIf targetFilename.Contains("/") Then
-                'If contains / treat as a full path
-                target = AdjustDir(targetFilename)
-            Else
-                'otherwise treat as filename only, use current directory
-                target = CurrentDirectory + targetFilename
             End If
+
             Using fs As FileStream = fi.OpenRead()
                 Try
                     Return Upload(fs, target)
 
                 Catch ex As Exception
-
-                    System.Diagnostics.Trace.WriteLine(ex.ToString())
+                    'ensure source file is closed
+                    fs.Close()
+                    'do not handle, throw
+                    Throw
 
                 Finally
 
@@ -235,22 +176,19 @@ Namespace Utilities.FTP
         ''' </summary>
         ''' <param name="sourceStream">Source Stream</param>
         ''' <param name="targetFilename">Target filename</param>
-        ''' <returns></returns>
+        ''' <returns>true if downloaded, otherwise false</returns>
+        ''' <remarks>
+        ''' 1.2: [HR] added CreateURI
+        ''' 1.2: [HR] amended routine to throw an exception on error
+        ''' </remarks>
         Public Function Upload(ByVal sourceStream As Stream, ByVal targetFilename As String) As Boolean
             'validate target file
-            Dim target As String
             If String.IsNullOrEmpty(targetFilename) Then
                 Throw New ApplicationException("Target filename must be specified")
-            ElseIf targetFilename.Contains("/") Then
-                'If contains / treat as a full path
-                target = AdjustDir(targetFilename)
-            Else
-                'otherwise treat as filename only, use current directory
-                target = CurrentDirectory & targetFilename
             End If
 
             'Build full target URL
-            Dim URI As String = Hostname & target
+            Dim URI As String = CreateURI(targetFilename)
             'perform copy
             Dim ftp As System.Net.FtpWebRequest = GetRequest(URI)
 
@@ -268,9 +206,8 @@ Namespace Utilities.FTP
 
             'open file for reading
             Using sourceStream
-
+                'wrap in error handling
                 Try
-
                     sourceStream.Position = 0
                     'open request to send
                     Using rs As Stream = ftp.GetRequestStream()
@@ -281,17 +218,17 @@ Namespace Utilities.FTP
                         rs.Close()
                     End Using
 
+                    'ensure file closed
+                    sourceStream.Close()
                     Return True
 
                 Catch
-                Finally
-                    'ensure file closed
                     sourceStream.Close()
-                    ftp = Nothing
+                    Throw
+                    
                 End Try
             End Using
 
-            Return False
         End Function
 
 
@@ -299,7 +236,7 @@ Namespace Utilities.FTP
 
 #Region "Download: File transfer FROM ftp server"
         ''' <summary>
-        ''' Copy a file from FTP server to local
+        ''' Download: Copy a file from FTP server to local
         ''' </summary>
         ''' <param name="sourceFilename">Target filename, if required</param>
         ''' <param name="localFilename">Full path of the local file</param>
@@ -312,36 +249,49 @@ Namespace Utilities.FTP
             Return Me.Download(sourceFilename, fi, PermitOverwrite)
         End Function
 
-        'Version taking an FtpFileInfo
+        ''' <summary>
+        ''' Download: version taking FtpFileInfo and string filename
+        ''' </summary>
+        ''' <param name="file"></param>
+        ''' <param name="localFilename"></param>
+        ''' <param name="PermitOverwrite"></param>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
         Public Function Download(ByVal file As FTPfileInfo, ByVal localFilename As String, Optional ByVal PermitOverwrite As Boolean = False) As Boolean
             Return Me.Download(file.FullName, localFilename, PermitOverwrite)
         End Function
 
-        'Another version taking FtpFileInfo and FileInfo
+        ''' <summary>
+        ''' Download: version taking FTPFileInfo and FileInfo
+        ''' </summary>
+        ''' <param name="file"></param>
+        ''' <param name="localFI"></param>
+        ''' <param name="PermitOverwrite"></param>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
         Public Function Download(ByVal file As FTPfileInfo, ByVal localFI As FileInfo, Optional ByVal PermitOverwrite As Boolean = False) As Boolean
             Return Me.Download(file.FullName, localFI, PermitOverwrite)
         End Function
 
-        'Version taking string/FileInfo
+        ''' <summary>
+        ''' Download FTP file: version taking string/FileInfo
+        ''' </summary>
+        ''' <param name="sourceFilename"></param>
+        ''' <param name="targetFI"></param>
+        ''' <param name="PermitOverwrite"></param>
+        ''' <returns></returns>
+        ''' <remarks>
+        ''' 1.2 [HR] added CreateURI
+        ''' </remarks>
         Public Function Download(ByVal sourceFilename As String, ByVal targetFI As FileInfo, Optional ByVal PermitOverwrite As Boolean = False) As Boolean
             '1. check target
             If targetFI.Exists And Not (PermitOverwrite) Then Throw New ApplicationException("Target file already exists")
 
             '2. check source
-            Dim target As String
-            If sourceFilename.Trim = "" Then
-                Throw New ApplicationException("File not specified")
-            ElseIf sourceFilename.Contains("/") Then
-                'treat as a full path
-                target = AdjustDir(sourceFilename)
-            Else
-                'treat as filename only, use current directory
-                target = CurrentDirectory & sourceFilename
-            End If
-
-            Dim URI As String = Hostname & target
+            If sourceFilename.Trim = "" Then Throw New ApplicationException("File not specified")
 
             '3. perform copy
+            Dim URI As String = CreateURI(sourceFilename)
             Dim ftp As Net.FtpWebRequest = GetRequest(URI)
 
             'Set request to download a file in binary mode
@@ -385,22 +335,22 @@ Namespace Utilities.FTP
         ''' Delete remote file
         ''' </summary>
         ''' <param name="filename">filename or full path</param>
-        ''' <returns></returns>
+        ''' <returns>True if file deleted successfully</returns>
         ''' <remarks></remarks>
         Public Function FtpDelete(ByVal filename As String) As Boolean
             'Determine if file or full path
-            Dim URI As String = Me.Hostname & GetFullPath(filename)
-
+            Dim URI As String = CreateURI(filename)
             Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Set request to delete
             ftp.Method = Net.WebRequestMethods.Ftp.DeleteFile
             Try
                 'get response but ignore it
                 Dim str As String = GetStringResponse(ftp)
+                Return True
+
             Catch ex As Exception
                 Return False
             End Try
-            Return True
         End Function
 
         ''' <summary>
@@ -447,6 +397,7 @@ Namespace Utilities.FTP
                 Throw
 
             Catch ex As Exception
+                'all other exceptions throw
                 Throw
             End Try
         End Function
@@ -458,13 +409,7 @@ Namespace Utilities.FTP
         ''' <returns></returns>
         ''' <remarks>Throws an exception if file does not exist</remarks>
         Public Function GetFileSize(ByVal filename As String) As Long
-            Dim path As String
-            If filename.Contains("/") Then
-                path = AdjustDir(filename)
-            Else
-                path = Me.CurrentDirectory & filename
-            End If
-            Dim URI As String = Me.Hostname & path
+            Dim URI As String = CreateURI(filename)
             Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Try to get info on file/dir?
             ftp.Method = Net.WebRequestMethods.Ftp.GetFileSize
@@ -480,6 +425,7 @@ Namespace Utilities.FTP
         ''' <returns></returns>
         ''' <remarks>
         ''' Source and target names should both be same type (partial or full paths)
+        ''' 1.2: [HR] added CreateURI
         ''' </remarks>
         Public Function FtpRename(ByVal sourceFilename As String, ByVal newName As String) As Boolean
             'Does file exist?
@@ -497,8 +443,7 @@ Namespace Utilities.FTP
             End If
 
             'perform rename
-            Dim URI As String = Me.Hostname & source
-
+            Dim URI As String = CreateURI(source)
             Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Set request to delete
             ftp.Method = Net.WebRequestMethods.Ftp.Rename
@@ -517,10 +462,12 @@ Namespace Utilities.FTP
         ''' </summary>
         ''' <param name="dirpath"></param>
         ''' <returns></returns>
-        ''' <remarks></remarks>
+        ''' <remarks>
+        ''' 1.2 [HR] added CreateURI
+        ''' </remarks>
         Public Function FtpCreateDirectory(ByVal dirpath As String) As Boolean
             'perform create
-            Dim URI As String = Me.Hostname & AdjustDir(dirpath)
+            Dim URI As String = CreateURI(dirpath)
             Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Set request to MkDir
             ftp.Method = Net.WebRequestMethods.Ftp.MakeDirectory
@@ -541,7 +488,8 @@ Namespace Utilities.FTP
         ''' <remarks></remarks>
         Public Function FtpDeleteDirectory(ByVal dirpath As String) As Boolean
             'perform remove
-            Dim URI As String = Me.Hostname & AdjustDir(dirpath)
+            Dim URI As String = CreateURI(dirpath)
+            'Dim URI As String = Me.Hostname & AdjustDir(dirpath)
             Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Set request to RmDir
             ftp.Method = Net.WebRequestMethods.Ftp.RemoveDirectory
@@ -573,13 +521,7 @@ Namespace Utilities.FTP
         ''' <returns></returns>
         ''' <remarks></remarks>
         Public Function GetDateTimestamp(ByVal filename As String) As DateTime
-            Dim path As String
-            If filename.Contains("/") Then
-                path = AdjustDir(filename)
-            Else
-                path = Me.CurrentDirectory & filename
-            End If
-            Dim URI As String = Me.Hostname & path
+            Dim URI As String = CreateURI(filename)
             Dim ftp As Net.FtpWebRequest = GetRequest(URI)
             'Try to get info on file/dir?
             ftp.Method = Net.WebRequestMethods.Ftp.GetDateTimestamp
@@ -589,8 +531,37 @@ Namespace Utilities.FTP
 #End Region
 
 #Region "private supporting fns"
-        'Get the basic FtpWebRequest object with the
-        'common settings and security
+
+        ''' <summary>
+        ''' Ensure the data payload for URI is properly escaped
+        ''' </summary>
+        ''' <param name="hostname">hostname part</param>
+        ''' <param name="filename">data after hostname to be escaped</param>
+        ''' <returns>properly escaped URI string</returns>
+        ''' <remarks>
+        ''' 1.2: added for fix to special chars issue
+        ''' 
+        ''' This function also checks for an adds relative path if required
+        ''' </remarks>
+        Private Function CreateURI(ByVal filename As String) As String
+            'adjust path
+            Dim path As String
+            If filename.Contains("/") Then
+                path = AdjustDir(filename)
+            Else
+                path = Me.CurrentDirectory & filename
+            End If
+            'Escape path
+            Dim escapedPath As String = GetEscapedPath(path)
+            Return Me.Hostname & escapedPath
+        End Function
+
+        ''' <summary>
+        ''' Get the basic FtpWebRequest object with the common settings and security
+        ''' </summary>
+        ''' <param name="URI"></param>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
         Private Function GetRequest(ByVal URI As String) As FtpWebRequest
             'create request
             Dim result As FtpWebRequest = CType(FtpWebRequest.Create(URI), FtpWebRequest)
@@ -608,6 +579,26 @@ Namespace Utilities.FTP
             Return result
         End Function
 
+        ''' <summary>
+        ''' Ensure chars in path are correctly escaped e.g. #
+        ''' </summary>
+        ''' <param name="path"></param>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        Private Function GetEscapedPath(ByVal path As String) As String
+            'Dim tmp2 As String = System.Uri.EscapeDataString(path)
+            'Dim tmp As String = System.Uri.EscapeUriString(path)
+            'Return tmp.Replace("#", "%23")
+            'split into directory parts
+            Dim parts() As String = path.Split("/")
+            Dim result As String = ""
+            For Each part As String In parts
+                'if not blank, escape with / prefix
+                If Not String.IsNullOrEmpty(part) Then _
+                    result &= "/" & Uri.EscapeDataString(part)
+            Next
+            Return result
+        End Function
 
         ''' <summary>
         ''' Get the credentials from username/password
@@ -637,15 +628,23 @@ Namespace Utilities.FTP
             Return CStr(IIf(path.StartsWith("/"), "", "/")) & path
         End Function
 
+        ''' <summary>
+        ''' Build directory request URI
+        ''' </summary>
+        ''' <param name="directory"></param>
+        ''' <returns></returns>
+        ''' <remarks>
+        ''' 1.2 [HR] added CreateURI
+        ''' </remarks>
         Private Function GetDirectory(Optional ByVal directory As String = "") As String
             Dim URI As String
             If directory = "" Then
                 'build from current
-                URI = Hostname & Me.CurrentDirectory
+                URI = CreateURI(Me.CurrentDirectory)
                 _lastDirectory = Me.CurrentDirectory
             Else
                 If Not directory.StartsWith("/") Then Throw New ApplicationException("Directory should start with /")
-                URI = Me.Hostname & directory
+                URI = CreateURI(directory)
                 _lastDirectory = directory
             End If
             Return URI

@@ -12,16 +12,22 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ' Use ClassInitialize to run code before running the first test in the class
     ' <ClassInitialize()> Public Shared Sub MyClassInitialize(ByVal testContext As TestContext)
     ' End Sub
+
+    ''' <summary>
+    ''' Set up the test environment
+    ''' </summary>
+    ''' <param name="testContext"></param>
+    ''' <remarks></remarks>
     <ClassInitialize()> Public Shared Sub MyClassInitialize(ByVal testContext As TestContext)
         'Setup local test directory
         localdir = New IO.DirectoryInfo(My.Settings.LocalDir)
         'ensure it exists
-        If localdir.Exists = False Then localdir.Create()
+        If Not localdir.Exists Then localdir.Create()
 
         'set remote dir and ensure it ends in \
         remoteDir = My.Settings.RemoteDir.TrimEnd("/"c) & "/"
 
-        'binary jpg image to use for testing
+        'setup binary jpg image to use for testing
         imageFile = New IO.FileInfo(localdir.FullName & "\" & My.Settings.ImageFile & ".jpg")
         'clear any existing file
         If imageFile.Exists Then imageFile.Delete()
@@ -30,7 +36,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         'set remote target version
         imageFileTarget = remoteDir & imageFile.Name
 
-        'text file to use for testing
+        'setup text file to use for testing
         textFile = New IO.FileInfo(localdir.FullName & "\" & My.Settings.TextFile & ".txt")
         'clear any existing file
         If textFile.Exists Then textFile.Delete()
@@ -38,6 +44,17 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         My.Computer.FileSystem.WriteAllText(textFile.FullName, My.Resources.ColossusText, False)
         'set remote target filename
         textFileTarget = remoteDir & textFile.Name
+
+
+        'setup special chars file to use for testing
+        specialCharsFile = New IO.FileInfo(localdir.FullName & "\" & My.Settings.SpecialCharsFile & ".txt")
+        'clear any existing file
+        If specialCharsFile.Exists Then textFile.Delete()
+        'write internal resource into it
+        My.Computer.FileSystem.WriteAllText(specialCharsFile.FullName, My.Resources.ColossusText, False)
+        'set remote target filename
+        specialCharsFileTarget = remoteDir & specialCharsFile.Name
+
 
         'ensure remote test directory exists
         Dim ftp As New Utilities.FTP.FTPclient(My.Settings.Host, My.Settings.Username, My.Settings.Password)
@@ -51,9 +68,13 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     Private Shared localdir As IO.DirectoryInfo
     Private Shared imageFile As IO.FileInfo
     Private Shared textFile As IO.FileInfo
+    '1.3: added special chars test
+    Private Shared specialCharsFile As IO.FileInfo
 
     Private Shared imageFileTarget As String
     Private Shared textFileTarget As String
+    '1.3: added special chars test
+    Private Shared specialCharsFileTarget As String
 
     ' Use ClassCleanup to run code after all tests in a class have run
     ' <ClassCleanup()> Public Shared Sub MyClassCleanup()
@@ -62,7 +83,7 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         'Clear out test directory
         If imageFile.Exists Then imageFile.Delete()
         If textFile.Exists Then textFile.Delete()
-
+        If specialCharsFile.Exists Then specialCharsFile.Delete()
     End Sub
 
     ' Use TestInitialize to run code before running each test
@@ -150,6 +171,31 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
         ftp.FtpDelete(imageFileTarget)
     End Sub
 
+    ''' <summary>
+    ''' Test upload of file containing URI-escape chars
+    ''' </summary>
+    ''' <remarks>
+    ''' Some characters in the FtpWebRequest URI need to be encoded e.g. # and any non-ASCII char
+    ''' </remarks>
+    <TestMethod()> Public Sub UploadBinarySpecialChars()
+        Dim ftp As New Utilities.FTP.FTPclient(My.Settings.Host, My.Settings.Username, My.Settings.Password)
+        'Ensure target does not exist
+        If ftp.FtpFileExists(specialCharsFileTarget) Then ftp.FtpDelete(specialCharsFileTarget)
+        'Test upload
+        ftp.Upload(specialCharsFile, specialCharsFileTarget)
+
+        'Check it exists
+        Assert.IsTrue(ftp.FtpFileExists(specialCharsFileTarget), "Remote file not found after upload")
+
+        'Compare filesizes
+        Dim remoteLength As Long = ftp.GetFileSize(specialCharsFileTarget)
+        Dim localLength As Long = specialCharsFile.Length
+        Assert.AreEqual(remoteLength, localLength, "File sizes do not match - upload error?")
+
+        'Clean up
+        Assert.IsTrue(ftp.FtpDelete(specialCharsFileTarget), "Failed to delete remote file")
+    End Sub
+
     <TestMethod()> Public Sub UploadText()
         Assert.Fail("Text mode not implemented at present")
     End Sub
@@ -203,12 +249,13 @@ Imports Microsoft.VisualStudio.TestTools.UnitTesting
     ''' </summary>
     ''' <remarks>
     ''' Requires write/delete access on FTP server
+    ''' Removed "\" on end of test directory!
     ''' </remarks>
     <TestMethod()> Public Sub CreateAndDeleteDirectory()
         Dim ftp As New Utilities.FTP.FTPclient(My.Settings.Host, My.Settings.Username, My.Settings.Password)
 
         'Create a temporary subdirectory
-        Dim SubDir As String = remoteDir & "TestDir\"
+        Dim SubDir As String = remoteDir & "TestDir"
 
         'Create directory
         Assert.IsTrue(ftp.FtpCreateDirectory(SubDir), "Failed to create subdirectory")
