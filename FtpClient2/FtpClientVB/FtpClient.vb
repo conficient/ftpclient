@@ -313,7 +313,7 @@ Namespace Utilities.FTP
                             responseStream.Close()
                             fs.Flush()
                             fs.Close()
-                        Catch ex As Exception
+                        Catch
                             'catch error and delete file only partially downloaded
                             fs.Close()
                             'delete target file as it's incomplete
@@ -348,8 +348,8 @@ Namespace Utilities.FTP
                 Dim str As String = GetStringResponse(ftp)
                 Return True
 
-            Catch ex As Exception
-                Return False
+            Catch
+                Throw
             End Try
         End Function
 
@@ -396,7 +396,7 @@ Namespace Utilities.FTP
                 'all other errors, throw
                 Throw
 
-            Catch ex As Exception
+            Catch
                 'all other exceptions throw
                 Throw
             End Try
@@ -451,8 +451,8 @@ Namespace Utilities.FTP
             Try
                 'get response but ignore it
                 Dim str As String = GetStringResponse(ftp)
-            Catch ex As Exception
-                Return False
+            Catch
+                Throw
             End Try
             Return True
         End Function
@@ -474,8 +474,8 @@ Namespace Utilities.FTP
             Try
                 'get response but ignore it
                 Dim str As String = GetStringResponse(ftp)
-            Catch ex As Exception
-                Return False
+            Catch
+                Throw
             End Try
             Return True
         End Function
@@ -496,8 +496,8 @@ Namespace Utilities.FTP
             Try
                 'get response but ignore it
                 Dim str As String = GetStringResponse(ftp)
-            Catch ex As Exception
-                Return False
+            Catch
+                Throw
             End Try
             Return True
         End Function
