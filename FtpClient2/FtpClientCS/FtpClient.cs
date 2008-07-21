@@ -238,7 +238,6 @@ namespace FTP
         public bool Upload(Stream sourceStream, string targetFilename)
         {
             // validate the target file
-            string target;
             if (string.IsNullOrEmpty(targetFilename))
             {
                 throw new ApplicationException("Target filename must be specified");
@@ -354,14 +353,13 @@ namespace FTP
             }
 
             //2. check source
-            string target;
             if (String.IsNullOrEmpty(sourceFilename))
             {
                 throw (new ApplicationException("File not specified"));
             }
 
             //3. perform copy
-            string URI = CreateURI(target);
+            string URI = CreateURI(sourceFilename);
             System.Net.FtpWebRequest ftp = GetRequest(URI);
 
             //Set request to download a file in binary mode
@@ -558,7 +556,7 @@ namespace FTP
         public bool FtpCreateDirectory(string dirpath)
         {
             //perform create
-            string URI = CreateURI(source);
+            string URI = CreateURI(dirpath);
             System.Net.FtpWebRequest ftp = GetRequest(URI);
             //Set request to MkDir
             ftp.Method = System.Net.WebRequestMethods.Ftp.MakeDirectory;
@@ -577,7 +575,7 @@ namespace FTP
         public bool FtpDeleteDirectory(string dirpath)
         {
             //perform remove
-            string URI = CreateURI(source);
+            string URI = CreateURI(dirpath);
             System.Net.FtpWebRequest ftp = GetRequest(URI);
             //Set request to RmDir
             ftp.Method = System.Net.WebRequestMethods.Ftp.RemoveDirectory;
@@ -673,7 +671,9 @@ namespace FTP
         private string GetEscapedPath(string path)
         {
             string[] parts;
-            parts = path.Split(@"/");
+            parts = path.Split('/');
+            string result;
+            result = "";
             foreach (string part in parts)
             {
                 if (!string.IsNullOrEmpty(part))

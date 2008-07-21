@@ -535,7 +535,6 @@ Namespace Utilities.FTP
         ''' <summary>
         ''' Ensure the data payload for URI is properly escaped
         ''' </summary>
-        ''' <param name="hostname">hostname part</param>
         ''' <param name="filename">data after hostname to be escaped</param>
         ''' <returns>properly escaped URI string</returns>
         ''' <remarks>
