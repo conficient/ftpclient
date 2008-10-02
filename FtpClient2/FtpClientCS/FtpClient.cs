@@ -686,10 +686,21 @@ namespace FTP
         /// <summary>
         /// Get the credentials from username/password
         /// </summary>
+        /// <remarks>
+        /// Amended to store credentials on first use, for re-use
+        /// when using KeepAlive=true
+        /// </remarks>
         private System.Net.ICredentials GetCredentials()
         {
-            return new System.Net.NetworkCredential(Username, Password);
+            if (_credentials == null)
+                _credentials = new System.Net.NetworkCredential(Username, Password);
+            return _credentials;
         }
+
+        /// <summary>
+        /// stored credentials
+        /// </summary>
+        private System.Net.NetworkCredential _credentials = null;
 
         /// <summary>
         /// returns a full path using CurrentDirectory for a relative file reference

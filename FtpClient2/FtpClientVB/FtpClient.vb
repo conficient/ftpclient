@@ -599,9 +599,18 @@ Namespace Utilities.FTP
         ''' <summary>
         ''' Get the credentials from username/password
         ''' </summary>
+        ''' <remarks>
+        ''' Updated to store the credentials on first use. This will
+        ''' make KeepAlive=true work correctly when logging into server
+        ''' </remarks>
         Private Function GetCredentials() As Net.ICredentials
-            Return New Net.NetworkCredential(Username, Password)
+            If _credentials Is Nothing Then
+                _credentials = New Net.NetworkCredential(Username, Password)
+            End If
+            Return _credentials
         End Function
+        Private _credentials As Net.NetworkCredential = Nothing
+
 
         ''' <summary>
         ''' returns a full path using CurrentDirectory for a relative file reference
