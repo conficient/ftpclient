@@ -216,7 +216,7 @@ namespace FTP
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Trace.WriteLine(ex.ToString());
+                    throw;
                 }
                 finally
                 {
@@ -279,7 +279,7 @@ namespace FTP
                 }
                 catch (Exception)
                 {
-
+                    throw;
                 }
                 finally
                 {
