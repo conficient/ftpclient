@@ -12,7 +12,7 @@ to .NET functionality.
 
 
 ## Source 
-I have done a straight port for now. The project is *very* old and originally targetted only .NET Framework 2.0.
+I have done a straight port for now. The project is *very* old and originally targeted only .NET Framework 2.0.
 
 ## Usage 
 
