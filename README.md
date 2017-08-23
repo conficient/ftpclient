@@ -16,10 +16,8 @@ I have done a straight port for now. The project is *very* old and originally ta
 
 ## Usage 
 
-To find out more about this library in the first instance read my [CodeProject article](https://www.codeproject.com/Articles/11991/An-FTP-client-library-for-NET).
-Originally written in VB.NET it has been translated into C# as well and I hope to maintain both versions as people will find it easier to debug and add functionality if it remains in both versions.
+To find out more about this library in the first instance read my [CodeProject article](https://www.codeproject.com/Articles/11991/An-FTP-client-library-for-NET). Originally written in VB.NET it has been translated into C# as well and I hope to maintain both versions as people will find it easier to debug and add functionality if it remains in both versions.
 
 ## Future
 
-So far I am just porting the code to make it available post-Codeplex. I may rewrite for .NET Core and .NET Standard 
-to make the library more portable.
+I am just porting the code to make it available post-Codeplex. I considered a .NET Standard / .NET Core version but the FtpWebRequest class is not part of the .NET Standard libraries. If you need an FTP client for Core I'd check out https://github.com/sparkeh9/CoreFTP
